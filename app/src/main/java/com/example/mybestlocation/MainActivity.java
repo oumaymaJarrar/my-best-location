@@ -1,43 +1,44 @@
 package com.example.mybestlocation;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
 import android.widget.Toast;
 import android.Manifest;
+import android.view.Menu;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.mybestlocation.databinding.MapBinding;
+import com.example.mybestlocation.ui.positiondetails.PositionDetailsFragment;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.mybestlocation.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
-
-    private AppBarConfiguration appBarConfiguration;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
     private MapBinding binding;
     private MapView mapView;
-
     private GoogleMap googleMap;
     private LatLng selectedLocation;
-    // private DatabaseHelper dbHelper; // Si vous en avez besoin
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+
+    private Location lastKnownLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,80 +46,208 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         binding = MapBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        // Initialisation de la carte
-        mapView = binding.mapView;
-        mapView.getMapAsync(this); // Déclenche onMapReady() une fois la carte prête
 
+        mapView = binding.mapView;
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
+
+        // Initialize FusedLocationProviderClient
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        // Configuration de la requête de localisation
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000); // 10 secondes
+        locationRequest.setFastestInterval(5000); // Mise à jour toutes les 5 secondes
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        // Initialisation du LocationCallback
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        Log.d("LocationTest", "Nouvelle position reçue : " + location);
+                        if (hasMovedSignificantly(location)) { // Vérification du déplacement
+                            updateLocationOnMap(location);
+                        }
+                    }
+                }
+            }
+        };
         requestPermission();
+        initListeners();
+        showSaveLocationButton();
+
+    }
+
+    private void updateLocationOnMap(Location location) {
+        lastKnownLocation = location;
+
+        LatLng userPosition = new LatLng(location.getLatitude(), location.getLongitude());
+        googleMap.clear(); // Supprimez les anciens marqueurs
+        googleMap.addMarker(new MarkerOptions().position(userPosition).title("Votre position"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userPosition, 15));
+
+    }
+
+    private boolean hasMovedSignificantly(Location newLocation) {
+        if (newLocation == null) return false;
+
+        // Vérification de la précision de la localisation
+        float accuracy = newLocation.getAccuracy(); // Précision en mètres
+        if (accuracy > 20.0f) { // Ignorer si la précision est trop faible
+            return false;
+        }
+
+        // Si c'est la première position, on l'accepte
+        if (lastKnownLocation == null) {
+            return true;
+        }
+
+        // Calcul de la distance parcourue
+        float distance = newLocation.distanceTo(lastKnownLocation);
+        Log.d("LocationTest", "Distance parcourue : " + distance + " mètres");
+
+        // Vérification si le déplacement est significatif
+        return true; // On accepte tout déplacement, même léger
+    }
+
+    private void initListeners() {
+        binding.btnMap.setOnClickListener(view -> {
+            if (selectedLocation != null) {
+                // Navigate to the fragment after selecting the location
+                navigateToUserDetailsFragment();
+            }
+        });
+
+    }
+
+    // Method to hide the button
+    public void hideSaveLocationButton() {
+        binding.btnMap.setVisibility(View.GONE);
+
+    }
+
+    // Method to show the button
+    public void showSaveLocationButton() {
+        binding.btnMap.setVisibility(View.VISIBLE);
     }
 
     private void requestPermission() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Demander la permission d'accès à la localisation
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_REQUEST_CODE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflater le menu; cela ajoute des éléments à la barre d'actions si elle est présente
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        // Gérer la navigation
-        return super.onSupportNavigateUp();
-    }
-
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        // on a attribuer a la var googleMad l'objet googleMAp pour puise interagir avec eu
+    public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
-// Vérifier si la permission d'accès à la localisation est accordée
+        // Check if permission is granted to access location
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            googleMap.setMyLocationEnabled(true); // Permet d'afficher la position actuelle de l'utilisateur
-        } else {
-            // Demander la permission si non accordée
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-        // un écouteur d'événements pour capturer les clics sur la carte
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull LatLng latLng) {
-                //màj de pos de user selectionner
-                selectedLocation = latLng;
-                // Ajoutez un marqueur
-                googleMap.addMarker(new MarkerOptions().position(latLng).title("Selected Location"));
-                // Zoom sur le point avec un niveau de zoom de 15
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            googleMap.setMyLocationEnabled(true);
 
-            }
+            // Get the current location and set the camera to it
+            getCurrentLocationAndSetCamera();
+        } else {
+            requestPermission();
+        }
+
+        googleMap.setOnMapClickListener(latLng -> {
+            selectedLocation = latLng;
+            googleMap.addMarker(new MarkerOptions().position(latLng).title("Selected Location"));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
         });
     }
+
+    // Get the current location and set the camera position
+    @SuppressLint("MissingPermission")
+    private void getCurrentLocationAndSetCamera() {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        // Get the latitude and longitude from the current location
+                        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                        // Set the camera position to the current location
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+
+                        // Optionally, add a marker for the current location
+                        googleMap.addMarker(new MarkerOptions().position(currentLatLng).title("Current Location"));
+
+                        // You can pass this location to the next fragment or save it
+                        selectedLocation = currentLatLng;
+                    } else {
+                        Toast.makeText(MainActivity.this, "Unable to get current location", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void navigateToUserDetailsFragment() {
+        // Create an instance of UserDetailsFragment
+        PositionDetailsFragment positionDetailsFragment = new PositionDetailsFragment();
+
+        // Bundle data: pass the selected location's latitude and longitude
+        Bundle bundle = new Bundle();
+        if (lastKnownLocation != null) {
+            bundle.putDouble("latitude", lastKnownLocation.getLatitude());
+            bundle.putDouble("longitude", lastKnownLocation.getLongitude());
+        }
+        positionDetailsFragment.setArguments(bundle);
+
+        // Start the fragment transaction
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, positionDetailsFragment)
+                .addToBackStack(null)
+                .commit();
+
+        hideSaveLocationButton();
+    }
+
+    @SuppressLint({"MissingSuperCall", "MissingPermission"})
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Si la permission est accordée, activez la localisation sur la carte
-                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    googleMap.setMyLocationEnabled(true);
-                }
+                googleMap.setMyLocationEnabled(true);
+                getCurrentLocationAndSetCamera();
             } else {
-                // Si la permission est refusée, affichez un message ou gérez l'erreur
-                // Exemple :
                 Toast.makeText(this, "Permission de localisation refusée", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+        showSaveLocationButton();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
     }
 }

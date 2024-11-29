@@ -2,12 +2,27 @@ package com.example.mybestlocation;
 
 public class Position {
     int idPosition;
-    String pseudo,numero,longitude,latitude;
+    String pseudo,number,longitude,latitude;
 
     public Position(int idPosition, String pseudo, String longitude, String latitude) {
         this.idPosition = idPosition;
         this.pseudo = pseudo;
-        this.numero = numero;
+        this.number = number;
+        this.longitude = longitude;
+        this.latitude = latitude;
+    }
+
+    public Position( String pseudo, String number, String longitude, String latitude) {
+        this.idPosition = idPosition;
+        this.pseudo = pseudo;
+        this.number = number;
+        this.longitude = longitude;
+        this.latitude = latitude;
+    }
+    public Position( int idPosition,String pseudo, String number, String longitude, String latitude) {
+        this.idPosition = idPosition;
+        this.pseudo = pseudo;
+        this.number = number;
         this.longitude = longitude;
         this.latitude = latitude;
     }
@@ -18,12 +33,13 @@ public class Position {
         this.pseudo = pseudo;
     }
 
+
     @Override
     public String toString() {
         return "Position{" +
                 "idPosition=" + idPosition +
                 ", pseudo='" + pseudo + '\'' +
-                ", numero='" + numero + '\'' +
+                ", numero='" + number + '\'' +
                 ", longitude='" + longitude + '\'' +
                 ", latitude='" + latitude + '\'' +
                 '}';
@@ -45,12 +61,12 @@ public class Position {
         this.pseudo = pseudo;
     }
 
-    public String getNumero() {
-        return numero;
+    public String getNumber() {
+        return number;
     }
 
-    public void setNumero(String numero) {
-        this.numero = numero;
+    public void setNumber(String numero) {
+        this.number = numero;
     }
 
     public String getLongitude() {

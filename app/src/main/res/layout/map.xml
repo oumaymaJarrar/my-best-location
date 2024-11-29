@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:background="@color/white"
+    android:orientation="vertical">
+
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_map"
@@ -14,17 +16,21 @@
         android:title="Map View"
         android:titleTextColor="@android:color/white" />
 
+    <!-- MapView -->
     <com.google.android.gms.maps.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        />
+        android:contentDescription="map" />
+
+    <!-- Button -->
     <Button
         android:id="@+id/btn_map"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save Location"
-        />
-
+        android:layout_marginTop="8dp"
+        android:backgroundTint="?attr/colorPrimary"
+        android:text="@string/save_location"
+        android:textColor="@android:color/white" />
 </LinearLayout>
