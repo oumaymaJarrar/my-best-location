@@ -35,10 +35,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng selectedLocation;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
 
     private Location lastKnownLocation;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +51,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Initialize FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         // Configuration de la requête de localisation
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000); // 10 secondes
         locationRequest.setFastestInterval(5000); // Mise à jour toutes les 5 secondes
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        // Initialisation du LocationCallback
-        locationCallback = new LocationCallback() {
+        // Requesting permissions
+        requestPermission();
+
+        // Initialize location updates
+        startLocationUpdates();
+        initListeners();
+        showSaveLocationButton();
+    }
+
+    private void startLocationUpdates() {
+        // Initialisation du LocationCallback pour récupérer les mises à jour de localisation
+        LocationCallback locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) {
@@ -77,10 +86,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         };
-        requestPermission();
-        initListeners();
-        showSaveLocationButton();
 
+        // Request location updates
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
     private void updateLocationOnMap(Location location) {
@@ -90,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.clear(); // Supprimez les anciens marqueurs
         googleMap.addMarker(new MarkerOptions().position(userPosition).title("Votre position"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userPosition, 15));
-
     }
 
     private boolean hasMovedSignificantly(Location newLocation) {
@@ -117,21 +124,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initListeners() {
         binding.btnMap.setOnClickListener(view -> {
-            if (selectedLocation != null) {
+            if (lastKnownLocation != null) {
                 // Navigate to the fragment after selecting the location
                 navigateToUserDetailsFragment();
             }
         });
-
     }
 
-    // Method to hide the button
     public void hideSaveLocationButton() {
         binding.btnMap.setVisibility(View.GONE);
-
     }
 
-    // Method to show the button
     public void showSaveLocationButton() {
         binding.btnMap.setVisibility(View.VISIBLE);
     }
@@ -193,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void navigateToUserDetailsFragment() {
-        // Create an instance of UserDetailsFragment
         PositionDetailsFragment positionDetailsFragment = new PositionDetailsFragment();
 
         // Bundle data: pass the selected location's latitude and longitude
