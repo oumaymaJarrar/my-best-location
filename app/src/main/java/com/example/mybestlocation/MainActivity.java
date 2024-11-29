@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
 import android.widget.Toast;
+import android.Manifest;
 
 import com.example.mybestlocation.databinding.MapBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;

@@ -18,6 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyBestLocation"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDg2nQJyw6z8kDde46cZ51XJ3tWVX2h9gw" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
