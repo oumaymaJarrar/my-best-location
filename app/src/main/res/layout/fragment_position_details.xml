@@ -2,21 +2,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/white">
 
     <EditText
         android:id="@+id/pseudoEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Pseudo"
-        android:inputType="text" />
+        android:inputType="text"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp"
+
+        android:background="@drawable/edit_text_background" />
 
     <EditText
         android:id="@+id/phoneNumberEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Phone Number"
-        android:inputType="phone" />
+        android:inputType="phone"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp"
+
+        android:background="@drawable/edit_text_background" />
 
     <EditText
         android:id="@+id/latitudeEditText"
@@ -25,7 +34,10 @@
         android:hint="Latitude"
         android:inputType="none"
         android:focusable="false"
-        android:clickable="false"/>
+        android:clickable="false"
+        android:padding="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/edit_text_background" />
 
     <EditText
         android:id="@+id/longitudeEditText"
@@ -34,24 +46,29 @@
         android:hint="Longitude"
         android:inputType="none"
         android:focusable="false"
-        android:clickable="false"/>
+        android:clickable="false"
+        android:padding="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/edit_text_background" />
 
     <Button
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="16dp"
         android:text="Save" />
+
     <Button
         android:id="@+id/showListButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="16dp"
         android:text="Show users position" />
+
     <Button
         android:id="@+id/backButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="16dp"
         android:text="Back to Home" />
 </LinearLayout>
