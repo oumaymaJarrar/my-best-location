@@ -7,4 +7,16 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Primary color for edit -->
+    <color name="primaryColor">#6200EE</color> <!-- Purple -->
+
+    <!-- Secondary color for send -->
+    <color name="secondaryColor">#03DAC5</color> <!-- Teal -->
+
+    <!-- Error color for delete -->
+    <color name="errorColor">#B00020</color> <!-- Red -->
+
+    <!-- Optional: Neutral color for text or background -->
+    <color name="neutralBackground">#FFFFFF</color> <!-- White -->
+    <color name="neutralText">#000000</color> <!-- Black -->
 </resources>

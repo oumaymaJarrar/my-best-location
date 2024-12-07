@@ -112,5 +112,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return positionList;
     }
+    // Méthode pour mettre à jour le pseudo et le numéro d'une position
+    public int updatePosition(int id, String newPseudo, String newNumero) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        // Ajout des nouvelles valeurs à mettre à jour
+        values.put(COLUMN_PSEUDO, newPseudo);
+        values.put(COLUMN_NUMERO, newNumero);
+
+        // Mise à jour de la table
+        int rowsAffected = db.update(
+                TABLE_POSITIONS,
+                values,
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(id)}
+        );
+
+        // Log pour confirmer la mise à jour
+        if (rowsAffected > 0) {
+            Log.d("Database", "Position mise à jour avec ID: " + id);
+        } else {
+            Log.d("Database", "Aucun contact trouvé avec ce ID: " + id);
+        }
+
+        db.close();
+        return rowsAffected; // Retourne le nombre de lignes affectées
+    }
 
 }

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.mybestlocation.DatabaseHelper;
+import com.example.mybestlocation.MainActivity;
 import com.example.mybestlocation.Position;
 import com.example.mybestlocation.R;
 import com.example.mybestlocation.ui.userpositionlist.UserPositionDetailsListFragment;
@@ -25,6 +26,7 @@ public class PositionDetailsFragment extends Fragment {
     private EditText longitudeEditText;
     private Button saveButton;
     private Button showListButton;
+    private Button backButton;
 
     // For holding user location (e.g., chosen from a map or input)
     private LatLng selectedLocation;
@@ -48,7 +50,7 @@ public class PositionDetailsFragment extends Fragment {
 
         saveButton = rootView.findViewById(R.id.saveButton);
         showListButton = rootView.findViewById(R.id.showListButton);
-
+        backButton = rootView.findViewById(R.id.backButton);
 
         double latitude = getArguments() != null ? getArguments().getDouble("latitude", 0.0) : 0.0;
         double longitude = getArguments() != null ? getArguments().getDouble("longitude", 0.0) : 0.0;
@@ -75,6 +77,14 @@ public class PositionDetailsFragment extends Fragment {
         showListButton.setOnClickListener(view -> {
             navigateToUserDetailsListFragment();
         });
+        // Back button listener
+        backButton.setOnClickListener(v -> {
+            // Ensure the save location button is visible when navigating back
+
+            // Go back to MainActivity (or previous fragment/activity) when back button is pressed
+            getActivity().onBackPressed(); // Use the Activity's onBackPressed() method
+        });
+
     }
 
     private void saveUserDetailsToDatabase() {
@@ -114,4 +124,5 @@ public class PositionDetailsFragment extends Fragment {
         transaction.addToBackStack(null); // Optional: If you want to add the transaction to the back stack
         transaction.commit(); // Commit the transaction
     }
+
 }

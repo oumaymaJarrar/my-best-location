@@ -1,5 +1,6 @@
 package com.example.mybestlocation.ui.userpositionlist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mybestlocation.DatabaseHelper;
+import com.example.mybestlocation.MainActivity;
 import com.example.mybestlocation.Position;
 import com.example.mybestlocation.R;
 import com.example.mybestlocation.ui.userpositionlist.adapter.PositionAdapter;
@@ -24,7 +26,7 @@ public class UserPositionDetailsListFragment extends Fragment {
     private PositionAdapter positionAdapter;
     private List<Position> positionList = new ArrayList<>();
     private DatabaseHelper databaseHelper;
-
+    private Button backButton;
     public UserPositionDetailsListFragment() {
         // Required empty public constructor
     }
@@ -43,13 +45,22 @@ public class UserPositionDetailsListFragment extends Fragment {
 
         // Fetch the positions from the database and set the adapter
         fetchPositionsFromDatabase();
-
-        // Show list button click listener
-        Button showListButton = rootView.findViewById(R.id.showListButton);
-        showListButton.setOnClickListener(v -> {
-            fetchPositionsFromDatabase();
-            positionAdapter.notifyDataSetChanged();
+        backButton = rootView.findViewById(R.id.backButton);
+        // Set click listener to navigate back to the map
+        backButton.setOnClickListener(v -> {
+            if (getActivity() != null) {
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                getActivity().finish(); // Close the current fragment's activity
+            }
         });
+        // Show list button click listener
+//        Button showListButton = rootView.findViewById(R.id.showListButton);
+//        showListButton.setOnClickListener(v -> {
+//            fetchPositionsFromDatabase();
+//            positionAdapter.notifyDataSetChanged();
+//        });
 
         return rootView;
     }

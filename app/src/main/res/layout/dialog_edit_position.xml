@@ -1,21 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/white">
+    android:background="@android:color/white">
     <TextView
         android:id="@+id/dialogTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:text="Add New Position"
+        android:text="Edit Position"
         android:textColor="@android:color/black"
-        android:textSize="30sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
         android:padding="16dp" />
-
+    <!-- Edit Pseudo -->
     <EditText
         android:id="@+id/pseudoEditText"
         android:layout_width="match_parent"
@@ -27,6 +28,7 @@
         android:textColor="@android:color/black"
         android:background="@drawable/edit_text_background" />
 
+    <!-- Edit Phone Number -->
     <EditText
         android:id="@+id/phoneNumberEditText"
         android:layout_width="match_parent"
@@ -38,6 +40,7 @@
         android:textColor="@android:color/black"
         android:background="@drawable/edit_text_background" />
 
+    <!-- Non-editable Latitude -->
     <EditText
         android:id="@+id/latitudeEditText"
         android:layout_width="match_parent"
@@ -51,6 +54,7 @@
         android:textColor="@android:color/black"
         android:background="@drawable/edit_text_background" />
 
+    <!-- Non-editable Longitude -->
     <EditText
         android:id="@+id/longitudeEditText"
         android:layout_width="match_parent"
@@ -64,35 +68,23 @@
         android:textColor="@android:color/black"
         android:background="@drawable/edit_text_background" />
 
+    <!-- Save Button -->
     <Button
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
-        android:textColor="@android:color/white"
-        android:padding="8dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@android:color/holo_green_dark"
-        android:text="@string/save_location"/>
-
-    <Button
-        android:id="@+id/showListButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="2dp"
         android:textColor="@android:color/white"
-        android:padding="8dp"
-        android:backgroundTint="@android:color/holo_blue_light"
-        android:text="Show List of Positions"/>
+        android:text="Save" />
 
+    <!-- Back to Home Button -->
     <Button
         android:id="@+id/backButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@android:color/holo_blue_light"
         android:textColor="@android:color/white"
-        android:padding="8dp"
-        android:backgroundTint="@color/purple_700"
         android:text="Back to Home" />
-
-
 </LinearLayout>

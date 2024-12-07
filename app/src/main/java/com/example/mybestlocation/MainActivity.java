@@ -1,6 +1,7 @@
 package com.example.mybestlocation;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,9 +13,12 @@ import android.view.Menu;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.mybestlocation.databinding.MapBinding;
 import com.example.mybestlocation.ui.positiondetails.PositionDetailsFragment;
+import com.example.mybestlocation.ui.userpositionlist.UserPositionDetailsListFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -64,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Initialize location updates
         startLocationUpdates();
         initListeners();
-        showSaveLocationButton();
+        showSaveLocationButtonAndShowUsersPositionsButton();
     }
 
     private void startLocationUpdates() {
@@ -129,14 +133,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 navigateToUserDetailsFragment();
             }
         });
+
+        binding.listsBtn.setOnClickListener(view -> {
+            navigateToUserDetailsListFragment();
+        });
     }
 
-    public void hideSaveLocationButton() {
+    private void navigateToUserDetailsListFragment() {
+        // Create the fragment to navigate to
+        UserPositionDetailsListFragment userDetailsListFragment = new UserPositionDetailsListFragment();
+
+        // Begin the fragment transaction
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, userDetailsListFragment); // Replace the container with the new fragment
+        transaction.addToBackStack(null); // Optional: If you want to add the transaction to the back stack
+        transaction.commit(); // Commit the transaction
+        hideSaveLocationButtonAndShowUsersPositionsButton();
+    }
+
+
+
+    public void hideSaveLocationButtonAndShowUsersPositionsButton() {
         binding.btnMap.setVisibility(View.GONE);
+        binding.listsBtn.setVisibility(View.GONE);
+
+        // Sauvegarde dans les préférences
+        saveButtonState(false, false);
     }
 
-    public void showSaveLocationButton() {
+    public void showSaveLocationButtonAndShowUsersPositionsButton() {
         binding.btnMap.setVisibility(View.VISIBLE);
+        binding.listsBtn.setVisibility(View.VISIBLE);
+
+        // Sauvegarde dans les préférences
+        saveButtonState(true, true);
+    }
+
+    private void saveButtonState(boolean isMapButtonVisible, boolean isListButtonVisible) {
+        SharedPreferences prefs = getSharedPreferences("ButtonPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isMapButtonVisible", isMapButtonVisible);
+        editor.putBoolean("isListButtonVisible", isListButtonVisible);
+        editor.apply();
     }
 
     private void requestPermission() {
@@ -211,8 +249,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .replace(R.id.fragment_container, positionDetailsFragment)
                 .addToBackStack(null)
                 .commit();
-
-        hideSaveLocationButton();
+        hideSaveLocationButtonAndShowUsersPositionsButton();
     }
 
     @SuppressLint({"MissingSuperCall", "MissingPermission"})
@@ -232,7 +269,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         mapView.onResume();
-        showSaveLocationButton();
+        // Vérifiez quel fragment est actuellement affiché
+
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+        if ((currentFragment instanceof PositionDetailsFragment || currentFragment instanceof UserPositionDetailsListFragment)) {
+
+            hideSaveLocationButtonAndShowUsersPositionsButton();
+        }
+        else {
+
+            showSaveLocationButtonAndShowUsersPositionsButton();}
+
     }
 
     @Override
@@ -252,4 +300,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+        if (currentFragment instanceof PositionDetailsFragment || currentFragment instanceof UserPositionDetailsListFragment) {
+            // Si l'utilisateur est dans un autre fragment, revenir en arrière
+            hideSaveLocationButtonAndShowUsersPositionsButton();
+        } else {
+            // Si l'utilisateur revient à la carte, assurez-vous que les boutons sont affichés
+            showSaveLocationButtonAndShowUsersPositionsButton();
+        }
+    }
+
 }

@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,9 +59,60 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.Positi
     }
 
     private void editPosition(Position position) {
-        // Implement editing functionality
-        // You can either show a dialog to edit details or navigate to another fragment to edit
+        // Create an AlertDialog for editing pseudo and phone number
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
+
+
+        // Inflate the custom dialog layout
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_position, null);
+        builder.setView(dialogView);
+
+        // Create the AlertDialog (without default buttons)
+        android.app.AlertDialog dialog = builder.create();
+
+        // Find input fields and buttons in the custom layout
+        EditText pseudoEditText = dialogView.findViewById(R.id.pseudoEditText);
+        EditText phoneEditText = dialogView.findViewById(R.id.phoneNumberEditText);
+        EditText latitudeEditText = dialogView.findViewById(R.id.latitudeEditText);
+        EditText longitudeEditText = dialogView.findViewById(R.id.longitudeEditText);
+        Button saveButton = dialogView.findViewById(R.id.saveButton);
+        Button backButton = dialogView.findViewById(R.id.backButton);
+
+        // Pre-fill the fields with current data
+        pseudoEditText.setText(position.getPseudo());
+        phoneEditText.setText(position.getNumber());
+        latitudeEditText.setText(position.getLatitude());
+        longitudeEditText.setText(position.getLongitude());
+
+        // Save button logic
+        saveButton.setOnClickListener(v -> {
+            // Update the position details in the database
+            String newPseudo = pseudoEditText.getText().toString().trim();
+            String newPhone = phoneEditText.getText().toString().trim();
+
+            // Update in database
+            databaseHelper.updatePosition(position.getIdPosition(), newPseudo, newPhone);
+
+            // Update in-memory list and notify RecyclerView
+            position.setPseudo(newPseudo);
+            position.setNumber(newPhone);
+            notifyDataSetChanged();
+
+            // Close the dialog
+            dialog.dismiss();
+        });
+
+        // Back button logic
+        backButton.setOnClickListener(v -> {
+            // Close the dialog without saving
+            dialog.dismiss();
+        });
+
+        // Show the dialog
+        dialog.show();
     }
+
+
 
     private void deletePosition(int positionId) {
         // Delete the position from the database
@@ -79,8 +132,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.Positi
     public static class PositionViewHolder extends RecyclerView.ViewHolder {
 
         TextView pseudoTextView, phoneNumberTextView, latitudeTextView, longitudeTextView;
-        Button editButton, deleteButton, smsButton;
-
+        ImageButton editButton, deleteButton, smsButton;
         public PositionViewHolder(@NonNull View itemView) {
             super(itemView);
             pseudoTextView = itemView.findViewById(R.id.pseudoTextView);
